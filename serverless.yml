@@ -1,0 +1,44 @@
+service: aws-node-conect-mongo
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-2
+  stage: dev
+
+
+package:
+  individually: true
+  patterns:
+    - "!.serverless/**"
+    - "!.git/**"
+    - "!*.md"
+    - "!env.*.json"
+    
+functions:
+  hello:
+    handler: app.handler
+    package:
+      patterns:
+        - '!package-lock.json'
+        - '!package.json'
+        - '!node_modules/**'
+    layers:
+      - { Ref: ApiLambdaLayer }
+    events:
+      - httpApi:
+          path: /
+          method: get
+
+layers:
+  Api:
+    path: layers/api-layers
+    name: ${self:service}-layer-app
+    description: Layer para el API
+    compatibleRuntimes:
+      - nodejs14.x
+
+plugins:
+  - serverless-offline
